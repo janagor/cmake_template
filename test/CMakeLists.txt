@@ -4,6 +4,11 @@ project(CmakeConfigPackageTests
   VERSION ${PROJECT_VERSION}
   LANGUAGES CXX)
 
+# Workaround clang>=22 flagging __COUNTER__ as c2y-extension
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 22)
+  add_definitions(-DCATCH_CONFIG_NO_COUNTER)
+endif()
+
 # ---- Test as standalone project the exported config package ----
 
 if(PROJECT_IS_TOP_LEVEL OR TEST_INSTALLED_VERSION)
