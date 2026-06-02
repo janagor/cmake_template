@@ -141,7 +141,7 @@ void consequence_game()
     for (std::size_t cur_x = 0; cur_x < game_board.width; ++cur_x) {
       std::vector<ftxui::Element> row;
       for (std::size_t cur_y = 0; cur_y < game_board.height; ++cur_y) {
-        row.push_back(buttons[idx]->Render());
+        row.push_back(buttons.at(idx)->Render());
         ++idx;
       }
       rows.push_back(ftxui::hbox(std::move(row)));
