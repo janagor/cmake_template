@@ -37,8 +37,23 @@
               graphviz
               pkg-config
               include-what-you-use
-
               llvm.clang-tools
+            ];
+          };
+          gcc = pkgs.mkShell.override { stdenv = pkgs.gcc16Stdenv; } {
+            packages = with pkgs; [
+              cmake
+              ninja
+              gcovr
+              ccache
+              doxygen
+              cppcheck
+              graphviz
+              pkg-config
+              include-what-you-use
+              llvm.clang-tools
+
+              mold
             ];
           };
         };
