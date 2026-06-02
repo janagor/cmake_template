@@ -12,7 +12,7 @@ By default (when building as the top-level project)
 
  * Address Sanitizer and Undefined Behavior Sanitizer enabled where possible
  * Warnings as errors
- * cppcheck static analysis
+ * clang-tidy and cppcheck static analysis
  * CPM for dependencies
 
 It includes

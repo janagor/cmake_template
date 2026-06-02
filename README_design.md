@@ -51,9 +51,9 @@ minimal runtime is layered on top.
 
 ## Static analysis
 
-clang-tidy and cppcheck run as part of the build, cppcheck on, clang-tidy off by
-default at top level. They are separate options because one tool may not be
-installed in every environment.
+clang-tidy and cppcheck run as part of the build, on by default at top level.
+They are separate options because one tool may not be installed in every
+environment.
 
 ## Link-time optimization
 
