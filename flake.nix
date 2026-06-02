@@ -17,10 +17,16 @@
       let
         pkgs = import nixpkgs { inherit system; };
         llvm = pkgs.llvmPackages_22;
+
+        llvmStdenv = pkgs.overrideCC llvm.stdenv (
+          llvm.stdenv.cc.override {
+            bintools = llvm.bintools;
+          }
+        );
       in
       {
         devShells = {
-          default = pkgs.mkShell.override { stdenv = llvm.stdenv; } {
+          default = pkgs.mkShell.override { stdenv = llvmStdenv; } {
             packages = with pkgs; [
               cmake
               ninja
@@ -32,11 +38,6 @@
               pkg-config
               include-what-you-use
 
-              llvm.lld
-              llvm.clang
-              llvm.openmp
-              llvm.bintools
-              llvm.compiler-rt
               llvm.clang-tools
             ];
           };
