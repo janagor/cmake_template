@@ -199,7 +199,7 @@ jobs:
           compiler: ${{ matrix.compiler }}
           vcvarsall: ${{ contains(matrix.os, 'windows' )}}
 
-          cmake: true
+          cmake: ${{ runner.os != 'Windows' || !contains(matrix.generator, 'Visual Studio') && true || env.CMAKE_VERSION_VS }}
           ninja: true
           vcpkg: false
           ccache: true
@@ -211,20 +211,9 @@ jobs:
           gcovr: true
           opencppcoverage: true
 
-      - name: Install CMake (Visual Studio 2026 generator)
-        if: runner.os == 'Windows' && contains(matrix.generator, 'Visual Studio')
-        shell: pwsh
-        run: |
-          $version = "${{ env.CMAKE_VERSION_VS }}"
-          $zip = "cmake-$version-windows-x86_64.zip"
-          $url = "https://github.com/Kitware/CMake/releases/download/v$version/$zip"
-          Invoke-WebRequest -Uri $url -OutFile $zip
-          Expand-Archive $zip -DestinationPath $env:RUNNER_TEMP
-          "$env:RUNNER_TEMP/cmake-$version-windows-x86_64/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-          cmake --version
-
       - name: Configure CMake
         run: |
+          cmake --version
           cmake -S . -B ./build -G "${{matrix.generator}}" -D${{ env.PROJECT_NAME }}_ENABLE_IPO=${{matrix.enable_ipo }} -DCMAKE_BUILD_TYPE:STRING=${{matrix.build_type}} -D${{ env.PROJECT_NAME }}_PACKAGING_MAINTAINER_MODE:BOOL=${{matrix.packaging_maintainer_mode}} -D${{ env.PROJECT_NAME }}_ENABLE_COVERAGE:BOOL=${{ matrix.build_type == 'Debug' }} -DGIT_SHA:STRING=${{ github.sha }}
 
       - name: Build
