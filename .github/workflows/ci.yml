@@ -14,6 +14,8 @@ env:
   CLANG_TIDY_VERSION: "22.1.8"
   # Windows: setup-cpp asset list has no LLVM 22 yet; compiler and clang-tidy must match.
   LLVM_VERSION_WINDOWS: "21.1.8"
+  # windows-latest (2026+) ships VS 2026; use windows-2022 in matrix.os for VS 2022.
+  VS_GENERATOR: "Visual Studio 18 2026"
   VERBOSE: 1
 
 
@@ -95,34 +97,36 @@ jobs:
           # Windows msvc builds
           - os: windows-latest
             compiler: msvc
-            generator: "Visual Studio 17 2022"
+            generator: "Visual Studio 18 2026"
             build_type: Debug
             packaging_maintainer_mode: On
             enable_ipo: On
 
           - os: windows-latest
             compiler: msvc
-            generator: "Visual Studio 17 2022"
+            generator: "Visual Studio 18 2026"
             build_type: Release
             packaging_maintainer_mode: On
             enable_ipo: On
 
           - os: windows-latest
             compiler: msvc
-            generator: "Visual Studio 17 2022"
+            generator: "Visual Studio 18 2026"
             build_type: Debug
             packaging_maintainer_mode: Off
+            enable_ipo: On
 
           - os: windows-latest
             compiler: msvc
-            generator: "Visual Studio 17 2022"
+            generator: "Visual Studio 18 2026"
             build_type: Release
             packaging_maintainer_mode: Off
+            enable_ipo: On
             package_generator: ZIP
 
           - os: windows-latest
             compiler: msvc
-            generator: "Visual Studio 17 2022"
+            generator: "Visual Studio 18 2026"
             build_type: Release
             packaging_maintainer_mode: On
             enable_ipo: On
