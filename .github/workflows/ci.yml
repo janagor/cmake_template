@@ -10,9 +10,10 @@ on:
       - develop
 
 env:
-  # Linux/macOS: match Nix/Docker. Windows: setup-cpp asset list has no LLVM 22 yet.
+  # Linux/macOS: match Nix/Docker.
   CLANG_TIDY_VERSION: "22.1.8"
-  CLANG_TIDY_VERSION_WINDOWS: "21.1.8"
+  # Windows: setup-cpp asset list has no LLVM 22 yet; compiler and clang-tidy must match.
+  LLVM_VERSION_WINDOWS: "21.1.8"
   VERBOSE: 1
 
 
@@ -54,6 +55,9 @@ jobs:
           # mingw is determined by this author to be too buggy to support
           - os: windows-latest
             compiler: gcc-16
+          # setup-cpp has no LLVM 22 Windows packages; use 21.1.8 there instead (see include)
+          - os: windows-latest
+            compiler: llvm-22.1.8
 
         include:
           # Add appropriate variables for gcov version required. This will intentionally break
@@ -63,6 +67,11 @@ jobs:
             enable_ipo: On
 
           - compiler: llvm-22.1.8
+            enable_ipo: Off
+            gcov_executable: "llvm-cov gcov"
+
+          - os: windows-latest
+            compiler: llvm-21.1.8
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
@@ -154,7 +163,7 @@ jobs:
           ninja: true
           vcpkg: false
           ccache: true
-          clangtidy: ${{ matrix.packaging_maintainer_mode == 'ON' && (runner.os == 'Windows' && env.CLANG_TIDY_VERSION_WINDOWS || env.CLANG_TIDY_VERSION) || false }}
+          clangtidy: ${{ matrix.packaging_maintainer_mode == 'ON' && (runner.os == 'Windows' && env.LLVM_VERSION_WINDOWS || env.CLANG_TIDY_VERSION) || false }}
 
 
           cppcheck: true
