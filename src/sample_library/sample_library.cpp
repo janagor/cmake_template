@@ -1,6 +1,6 @@
 #include <myproject/sample_library.hpp>
 
-int factorial(int input) noexcept
+auto Factorial(int input) noexcept -> int
 {
   int result = 1;
 
