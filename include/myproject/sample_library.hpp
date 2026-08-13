@@ -3,7 +3,7 @@
 
 #include <myproject/sample_library_export.hpp>
 
-[[nodiscard]] SAMPLE_LIBRARY_EXPORT auto Factorial(int /*input*/) noexcept -> int;
+[[nodiscard]] SAMPLE_LIBRARY_EXPORT auto Factorial(int input) noexcept -> int;
 
 [[nodiscard]] constexpr auto FactorialConstexpr(int input) noexcept -> int
 {
