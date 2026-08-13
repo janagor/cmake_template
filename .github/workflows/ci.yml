@@ -14,8 +14,9 @@ env:
   CLANG_TIDY_VERSION: "22.1.8"
   # Windows: setup-cpp asset list has no LLVM 22 yet; compiler and clang-tidy must match.
   LLVM_VERSION_WINDOWS: "21.1.8"
-  # windows-latest (2026+) ships VS 2026; use windows-2022 in matrix.os for VS 2022.
+  # windows-latest ships VS 2026; setup-cpp CMake 3.31 needs a newer build for this generator.
   VS_GENERATOR: "Visual Studio 18 2026"
+  CMAKE_VERSION_VS: "4.4.2"
   VERBOSE: 1
 
 
@@ -74,6 +75,37 @@ jobs:
 
           - os: windows-latest
             compiler: llvm-21.1.8
+            generator: "Ninja Multi-Config"
+            build_type: Debug
+            packaging_maintainer_mode: ON
+            build_shared: OFF
+            enable_ipo: Off
+            gcov_executable: "llvm-cov gcov"
+
+          - os: windows-latest
+            compiler: llvm-21.1.8
+            generator: "Ninja Multi-Config"
+            build_type: Debug
+            packaging_maintainer_mode: OFF
+            build_shared: OFF
+            enable_ipo: Off
+            gcov_executable: "llvm-cov gcov"
+
+          - os: windows-latest
+            compiler: llvm-21.1.8
+            generator: "Ninja Multi-Config"
+            build_type: Release
+            packaging_maintainer_mode: ON
+            build_shared: OFF
+            enable_ipo: Off
+            gcov_executable: "llvm-cov gcov"
+
+          - os: windows-latest
+            compiler: llvm-21.1.8
+            generator: "Ninja Multi-Config"
+            build_type: Release
+            packaging_maintainer_mode: OFF
+            build_shared: OFF
             enable_ipo: Off
             gcov_executable: "llvm-cov gcov"
 
@@ -100,6 +132,7 @@ jobs:
             generator: "Visual Studio 18 2026"
             build_type: Debug
             packaging_maintainer_mode: On
+            build_shared: OFF
             enable_ipo: On
 
           - os: windows-latest
@@ -107,6 +140,7 @@ jobs:
             generator: "Visual Studio 18 2026"
             build_type: Release
             packaging_maintainer_mode: On
+            build_shared: OFF
             enable_ipo: On
 
           - os: windows-latest
@@ -114,6 +148,7 @@ jobs:
             generator: "Visual Studio 18 2026"
             build_type: Debug
             packaging_maintainer_mode: Off
+            build_shared: OFF
             enable_ipo: On
 
           - os: windows-latest
@@ -121,6 +156,7 @@ jobs:
             generator: "Visual Studio 18 2026"
             build_type: Release
             packaging_maintainer_mode: Off
+            build_shared: OFF
             enable_ipo: On
             package_generator: ZIP
 
@@ -129,8 +165,8 @@ jobs:
             generator: "Visual Studio 18 2026"
             build_type: Release
             packaging_maintainer_mode: On
-            enable_ipo: On
             build_shared: On
+            enable_ipo: On
 
 
     steps:
@@ -174,6 +210,18 @@ jobs:
 
           gcovr: true
           opencppcoverage: true
+
+      - name: Install CMake (Visual Studio 2026 generator)
+        if: runner.os == 'Windows' && contains(matrix.generator, 'Visual Studio')
+        shell: pwsh
+        run: |
+          $version = "${{ env.CMAKE_VERSION_VS }}"
+          $zip = "cmake-$version-windows-x86_64.zip"
+          $url = "https://github.com/Kitware/CMake/releases/download/v$version/$zip"
+          Invoke-WebRequest -Uri $url -OutFile $zip
+          Expand-Archive $zip -DestinationPath $env:RUNNER_TEMP
+          "$env:RUNNER_TEMP/cmake-$version-windows-x86_64/bin" | Out-File -FilePath $env:GITHUB_PATH -Append
+          cmake --version
 
       - name: Configure CMake
         run: |
