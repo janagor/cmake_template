@@ -105,18 +105,18 @@ template<std::size_t Width, std::size_t Height> struct GameBoard
 
 namespace {
 
+// NOLINTBEGIN(bugprone-easily-swappable-parameters)
 auto MakeConsequenceLayout(const std::vector<ftxui::Component> &buttons,
-  const ftxui::Component &quit_button,
-  std::size_t width,
-  std::size_t height) -> ftxui::Element// NOLINT same typed parameters adjacent to each other
+  const ftxui::Component &quit_button, std::size_t board_width, std::size_t board_height) -> ftxui::Element
+// NOLINTEND(bugprone-easily-swappable-parameters)
 {
   std::vector<ftxui::Element> rows;
 
   std::size_t idx = 0;
 
-  for (std::size_t cur_x = 0; cur_x < width; ++cur_x) {
+  for (std::size_t cur_x = 0; cur_x < board_width; ++cur_x) {
     std::vector<ftxui::Element> row;
-    for (std::size_t cur_y = 0; cur_y < height; ++cur_y) {
+    for (std::size_t cur_y = 0; cur_y < board_height; ++cur_y) {
       row.push_back(buttons.at(idx)->Render());
       ++idx;
     }

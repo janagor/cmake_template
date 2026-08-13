@@ -1,71 +1,72 @@
 ## Docker Instructions
 
-If you have [Docker](https://www.docker.com/) installed, you can run this
-in your terminal, when the Dockerfile is inside the `.devcontainer` directory:
+The `.devcontainer` image provides a full C++ build environment on Ubuntu 24.04 (`noble`):
+
+**cmake**, **ninja**, **gcovr**, **ccache**, **doxygen**, **cppcheck**, **graphviz**, **pkg-config**, **include-what-you-use**, **clang-tidy**, **GCC 16**, **LLVM/Clang 22**, and **mold**.
+
+Two build targets set the default compiler:
+
+| Target | Default `CC`/`CXX` | Typical CMake preset |
+| --- | --- | --- |
+| `clang` (default) | `clang` / `clang++` | `unixlike-clang-release` |
+| `gcc` | `gcc` / `g++` | `unixlike-gcc-release` |
+
+Optional build args: `VARIANT` (default `noble`), `GCC_VER` (default `16`), `LLVM_VER` (default `22`).
+
+### Build the image
+
+From the repository root:
 
 ```bash
-docker build -f ./.devcontainer/Dockerfile --tag=my_project:latest .
-docker run -it my_project:latest
+docker build -f ./.devcontainer/Dockerfile --target clang --tag=cmake_template:clang .
+docker build -f ./.devcontainer/Dockerfile --target gcc --tag=cmake_template:gcc .
 ```
 
-This command will put you in a `bash` session in a Ubuntu 20.04 Docker container,
-with all of the tools listed in the [Dependencies](README_dependencies.md#dependencies) section already installed.
-Additionally, you will have `g++-11` and `clang++-13` installed as the default
-versions of `g++` and `clang++`.
+Omitting `--target` builds the `clang` image (last stage in the Dockerfile).
 
-If you want to build this container using some other versions of gcc and clang,
-you may do so with the `GCC_VER` and `LLVM_VER` arguments:
+### Run the container
 
-```bash
-docker build --tag=myproject:latest --build-arg GCC_VER=10 --build-arg LLVM_VER=11 .
-```
+Dev Containers / Cursor bind-mount the workspace automatically via [devcontainer.json](.devcontainer/devcontainer.json).
 
-The CC and CXX environment variables are set to GCC version 11 by default.
-If you wish to use clang as your default CC and CXX environment variables, you
-may do so like this:
-
-```bash
-docker build --tag=my_project:latest --build-arg USE_CLANG=1 .
-```
-
-You will be logged in as root, so you will see the `#` symbol as your prompt.
-You will be in a directory that contains a copy of the `cpp_starter_project`;
-any changes you make to your local copy will not be updated in the Docker image
-until you rebuild it.
-If you need to mount your local copy directly in the Docker image, see
-[Docker volumes docs](https://docs.docker.com/storage/volumes/).
-TLDR:
+For a manual shell, mount your checkout:
 
 ```bash
 docker run -it \
-	-v absolute_path_on_host_machine:absolute_path_in_guest_container \
-	my_project:latest
+  -v "$(pwd)":/workspaces/cmake_template \
+  -w /workspaces/cmake_template \
+  cmake_template:clang
 ```
 
-You can configure and build [as directed above](#build) using these commands:
+Use `cmake_template:gcc` for the GCC image.
+
+### Configure and build
+
+Use a fresh build directory if you previously configured on the host and see cache path errors:
 
 ```bash
-/starter_project# mkdir build
-/starter_project# cmake -S . -B ./build
-/starter_project# cmake --build ./build
+rm -rf out/build/unixlike-clang-release   # or unixlike-gcc-release
 ```
 
-You can configure and build using `clang-13`, without rebuilding the container,
-with these commands:
+**Clang** (`cmake_template:clang`):
 
 ```bash
-/starter_project# mkdir build
-/starter_project# CC=clang CXX=clang++ cmake -S . -B ./build
-/starter_project# cmake --build ./build
+cmake --preset unixlike-clang-release
+cmake --build out/build/unixlike-clang-release -j"$(nproc)"
 ```
 
-The `ccmake` tool is also installed; you can substitute `ccmake` for `cmake` to
-configure the project interactively.
-All of the tools this project supports are installed in the Docker image;
-enabling them is as simple as flipping a switch using the `ccmake` interface.
-Be aware that some of the sanitizers conflict with each other, so be sure to
-run them separately.
+**GCC** (`cmake_template:gcc`):
 
-A script called `build_examples.sh` is provided to help you to build the example
-GUI projects in this container.
+```bash
+cmake --preset unixlike-gcc-release
+cmake --build out/build/unixlike-gcc-release -j"$(nproc)"
+```
 
+**Tests:**
+
+```bash
+ctest --preset test-unixlike-clang-release
+# or
+ctest --preset test-unixlike-gcc-release
+```
+
+The `gcc` target includes **mold** for linker presets that request it. Both targets include **clang-tidy** regardless of which compiler you build with.
