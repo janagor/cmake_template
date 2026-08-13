@@ -25,7 +25,7 @@ jobs:
     strategy:
       matrix:
         compiler:
-          - gcc-14
+          - gcc-16
         generator:
           - "Unix Makefiles"
         build_type:
@@ -181,7 +181,7 @@ jobs:
     strategy:
       matrix:
         compiler:
-          - gcc-11
+          - gcc-16
         generator:
           - "Unix Makefiles"
         build_type:
@@ -239,7 +239,7 @@ jobs:
       - name: Setup Cpp
         uses: aminya/setup-cpp@v1
         with:
-          compiler: gcc
+          compiler: gcc-16
 
           cmake: true
           ninja: false
