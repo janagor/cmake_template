@@ -2,9 +2,7 @@ include(cmake/LibFuzzer.cmake)
 include(CMakeDependentOption)
 include(CheckCXXCompilerFlag)
 
-
 include(CheckCXXSourceCompiles)
-
 
 macro(myproject_supports_sanitizers)
   # Emscripten doesn't support sanitizers
@@ -35,7 +33,7 @@ macro(myproject_supports_sanitizers)
   if((CMAKE_CXX_COMPILER_ID MATCHES ".*Clang.*" OR CMAKE_CXX_COMPILER_ID MATCHES ".*GNU.*") AND WIN32)
     set(SUPPORTS_ASAN OFF)
   else()
-    if (NOT WIN32)
+    if(NOT WIN32)
       message(STATUS "Sanity checking AddressSanitizer, it should be supported on this platform")
       set(TEST_PROGRAM "int main() { return 0; }")
 
@@ -115,7 +113,10 @@ macro(myproject_setup_options)
   endif()
 
   myproject_check_libfuzzer_support(LIBFUZZER_SUPPORTED)
-  if(LIBFUZZER_SUPPORTED AND (myproject_ENABLE_SANITIZER_ADDRESS OR myproject_ENABLE_SANITIZER_THREAD OR myproject_ENABLE_SANITIZER_UNDEFINED))
+  if(LIBFUZZER_SUPPORTED
+     AND (myproject_ENABLE_SANITIZER_ADDRESS
+          OR myproject_ENABLE_SANITIZER_THREAD
+          OR myproject_ENABLE_SANITIZER_UNDEFINED))
     set(DEFAULT_FUZZER ON)
   else()
     set(DEFAULT_FUZZER OFF)
@@ -135,7 +136,7 @@ macro(myproject_global_options)
 
   if(myproject_ENABLE_HARDENING AND myproject_ENABLE_GLOBAL_HARDENING)
     include(cmake/Hardening.cmake)
-    if(NOT SUPPORTS_UBSAN 
+    if(NOT SUPPORTS_UBSAN
        OR myproject_ENABLE_SANITIZER_UNDEFINED
        OR myproject_ENABLE_SANITIZER_ADDRESS
        OR myproject_ENABLE_SANITIZER_THREAD
@@ -221,7 +222,7 @@ macro(myproject_local_options)
 
   if(myproject_ENABLE_HARDENING AND NOT myproject_ENABLE_GLOBAL_HARDENING)
     include(cmake/Hardening.cmake)
-    if(NOT SUPPORTS_UBSAN 
+    if(NOT SUPPORTS_UBSAN
        OR myproject_ENABLE_SANITIZER_UNDEFINED
        OR myproject_ENABLE_SANITIZER_ADDRESS
        OR myproject_ENABLE_SANITIZER_THREAD
