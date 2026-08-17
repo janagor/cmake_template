@@ -69,7 +69,7 @@ template<std::size_t Width, std::size_t Height> struct GameBoard
 
   GameBoard()
   {
-    visit([](const auto cur_x, const auto cur_y, auto &gameboard) -> auto { gameboard.set(cur_x, cur_y, true); });
+    visit([](auto const cur_x, auto const cur_y, auto &gameboard) -> auto { gameboard.set(cur_x, cur_y, true); });
   }
 
   void update_strings()
@@ -106,8 +106,10 @@ template<std::size_t Width, std::size_t Height> struct GameBoard
 namespace {
 
 // NOLINTBEGIN(bugprone-easily-swappable-parameters)
-auto MakeConsequenceLayout(const std::vector<ftxui::Component> &buttons,
-  const ftxui::Component &quit_button, std::size_t board_width, std::size_t board_height) -> ftxui::Element
+auto MakeConsequenceLayout(std::vector<ftxui::Component> const &buttons,
+  ftxui::Component const &quit_button,
+  std::size_t board_width,
+  std::size_t board_height) -> ftxui::Element
 // NOLINTEND(bugprone-easily-swappable-parameters)
 {
   std::vector<ftxui::Element> rows;
@@ -136,7 +138,7 @@ void ConsequenceGame()
 
   std::string quit_text;
 
-  const auto update_quit_text = [&quit_text](const auto &game_board_param) -> auto {
+  auto const update_quit_text = [&quit_text](auto const &game_board_param) -> auto {
     quit_text = fmt::format("Quit ({} moves)", game_board_param.move_count);
     if (game_board_param.solved()) { quit_text += " Solved!"; }
   };
@@ -205,8 +207,8 @@ struct Bitmap : ftxui::Node
       for (std::size_t cur_y = 0; cur_y < height_ / 2; ++cur_y) {
         auto &pixel = screen.PixelAt(box_.x_min + static_cast<int>(cur_x), box_.y_min + static_cast<int>(cur_y));
         pixel.character = "▄";
-        const auto &top_color = at(cur_x, cur_y * 2);
-        const auto &bottom_color = at(cur_x, (cur_y * 2) + 1);
+        auto const &top_color = at(cur_x, cur_y * 2);
+        auto const &bottom_color = at(cur_x, (cur_y * 2) + 1);
         pixel.background_color = ftxui::Color{ top_color.r.get(), top_color.g.get(), top_color.b.get() };
         pixel.foreground_color = ftxui::Color{ bottom_color.r.get(), bottom_color.g.get(), bottom_color.b.get() };
       }
@@ -228,14 +230,14 @@ private:
 
 namespace {
 
-auto MakeCanvasLayout(const std::shared_ptr<Bitmap> &bitmap,
-  const std::shared_ptr<Bitmap> &small_bitmap,
+auto MakeCanvasLayout(std::shared_ptr<Bitmap> const &bitmap,
+  std::shared_ptr<Bitmap> const &small_bitmap,
   int &counter,
-  const double &fps,
+  double const &fps,
   std::chrono::steady_clock::time_point &last_time,
-  const std::function<void(const std::chrono::steady_clock::duration)> &game_iteration) -> ftxui::Element
+  std::function<void(std::chrono::steady_clock::duration const)> const &game_iteration) -> ftxui::Element
 {
-  const auto new_time = std::chrono::steady_clock::now();
+  auto const new_time = std::chrono::steady_clock::now();
 
   ++counter;
   game_iteration(new_time - last_time);
@@ -260,7 +262,7 @@ void GameIterationCanvas()
   std::size_t max_col = 0;
 
   // to do, add total game time clock also, not just current elapsed time
-  auto game_iteration = [&](const std::chrono::steady_clock::duration elapsed_time) -> void {
+  auto game_iteration = [&](std::chrono::steady_clock::duration const elapsed_time) -> void {
     // in here we simulate however much game time has elapsed. Update animations,
     // run character AI, whatever, update stats, etc
 
@@ -329,7 +331,7 @@ void GameIterationCanvas()
 }// namespace
 
 // NOLINTNEXTLINE(bugprone-exception-escape)
-auto main(int argc, const char **argv) -> int
+auto main(int argc, char const **argv) -> int
 {
   try {
     CLI::App app{ fmt::format("{} version {}", myproject::cmake::kProjectName, myproject::cmake::kProjectVersion) };
@@ -362,7 +364,7 @@ auto main(int argc, const char **argv) -> int
       GameIterationCanvas();
     }
 
-  } catch (const std::exception &e) {
+  } catch (std::exception const &e) {
     spdlog::error("Unhandled exception in main: {}", e.what());
   }
 }
