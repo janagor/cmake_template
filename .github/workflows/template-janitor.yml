@@ -89,6 +89,9 @@ jobs:
           # hyphens and dots in c++ identifiers are forbidden. Use underscores instead.
           NEW_SAFE_PROJECT=$(echo ${{ env.NEW_PROJECT }} | sed "s/-/_/g" | sed "s/\./_/g" )
           echo "NEW_SAFE_PROJECT=$NEW_SAFE_PROJECT" >> $GITHUB_ENV
+          # Include guards and other macro identifiers must stay uppercase.
+          NEW_SAFE_PROJECT_UPPER=$(echo "$NEW_SAFE_PROJECT" | tr '[:lower:]' '[:upper:]')
+          echo "NEW_SAFE_PROJECT_UPPER=$NEW_SAFE_PROJECT_UPPER" >> $GITHUB_ENV
           # The sed command uses the pipe as the delimiter so escape that to make it safe.
           # Also as we would remove any literal \ we have to escape those aswell and that has to
           # be done first as it would mess with the escape for the | otherwise.
@@ -99,7 +102,10 @@ jobs:
       - name: Insert new org and project
         run: |
           # rename the CMake project to match the github project
-          find src include test fuzz_test cmake -type f -exec sed -i "s/myproject/${{ env.NEW_SAFE_PROJECT }}/gi" .github/constants.env CMakeLists.txt Dependencies.cmake ProjectOptions.cmake .github/workflows/ci.yml .github/workflows/codeql-analysis.yml configured_files/config.hpp.in {} +
+          find src include test fuzz_test cmake -type f -exec sed -i "s/myproject/${{ env.NEW_SAFE_PROJECT }}/gi" .github/constants.env CMakeLists.txt Dependencies.cmake ProjectOptions.cmake .github/workflows/ci.yml .github/workflows/codeql-analysis.yml CMakePresets.json configured_files/config.hpp.in {} +
+
+          # Case-insensitive replacement lowercases include-guard prefixes; restore uppercase.
+          sed -i "s/${{ env.NEW_SAFE_PROJECT }}_CONFIG_HPP/${{ env.NEW_SAFE_PROJECT_UPPER }}_CONFIG_HPP/g" configured_files/config.hpp.in
 
           # Update URL placeholders for project
           sed -i "s|%%myurl%%|${{ fromJson(steps.get_repo_meta.outputs.data).html_url }}|gi" CMakeLists.txt
